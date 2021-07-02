@@ -1,7 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-import { HttpClientModule } from '@angular/common/http';
+// import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
+import { OKTA_CONFIG, OktaAuthModule } from '@okta/okta-angular';
 
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -19,6 +21,16 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HomeComponent } from './home/home.component';
 import { SearchComponent } from './search/search.component';
 import { DetailsComponent } from './details/details.component';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { CachingInterceptor } from './cache/caching-interceptor.service';
+
+const oktaConfig = {
+  issuer: 'https://dev-1230068.okta.com/oauth2/default',
+  clientId: '0oa14wg3g3a8gzQh45d7',
+  redirectUri: window.location.origin + '/callback'
+};
 
 @NgModule({
   declarations: [
@@ -42,9 +54,19 @@ import { DetailsComponent } from './details/details.component';
     MatTableModule,
     MatDividerModule,
     MatProgressSpinnerModule,
-    AppRoutingModule
+    AppRoutingModule,
+    OktaAuthModule,
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: environment.production,
+      // Register the ServiceWorker as soon as the app is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    })
   ],
-  providers: [],
+  providers: [
+    { provide: OKTA_CONFIG, useValue: oktaConfig },
+    { provide: HTTP_INTERCEPTORS, useClass: CachingInterceptor, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

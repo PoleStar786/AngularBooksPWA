@@ -5,6 +5,11 @@
       <mat-icon>home</mat-icon>
     </button>
   </span>
+  <button mat-button *ngIf="!isAuthenticated" (click)="login()"> Login </button>
+  <button mat-button *ngIf="isAuthenticated" (click)="logout()"> Logout </button>
+
+  <div *ngIf="offline">offline</div>
+  
   <div fxLayout="row" fxShow="false" fxShow.gt-sm>
     <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
       <div class="input-group">
